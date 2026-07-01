@@ -3,18 +3,18 @@ on:
   push:
     branches: [ main, master ]
     paths:
-      - 'SDET/intro-to-playwright/**'
+      - 'intro-to-playwright/**'
   pull_request:
     branches: [ main, master ]
     paths:
-      - 'SDET/intro-to-playwright/**'
+      - 'intro-to-playwright/**'
 jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: SDET/intro-to-playwright
+        working-directory: intro-to-playwright
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
@@ -30,5 +30,5 @@ jobs:
       if: ${{ !cancelled() }}
       with:
         name: playwright-report-sdet
-        path: SDET/intro-to-playwright/playwright-report/
+        path: intro-to-playwright/playwright-report/
         retention-days: 30
