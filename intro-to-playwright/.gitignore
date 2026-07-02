@@ -6,3 +6,9 @@ node_modules/
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+/docs
+
+# Environment / secrets
+.env
+.env.*
+!.env.example

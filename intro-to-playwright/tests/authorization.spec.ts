@@ -1,65 +1,49 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures/base";
+import { users } from "./fixtures/test-data";
 
-test("Login with valid credentials", async ({ page }) => {
-  await page.goto("https://www.saucedemo.com/");
-  await page.getByRole("textbox", { name: "Username" }).fill("standard_user");
-  await page.getByRole("textbox", { name: "Password" }).fill("secret_sauce");
-  await page.getByRole("button", { name: "Login" }).click();
+test.describe("Authorization", () => {
+  test.beforeEach(async ({ loginPage }) => {
+    await loginPage.goto();
+  });
 
-  await expect(page).toHaveURL(/\/inventory/);
-});
+  test("Login with valid credentials", async ({ loginPage, inventoryPage }) => {
+    const { username, password } = users.standard();
+    await loginPage.login({ username, password });
 
-test("Login with locked out user", async ({ page }) => {
-  await page.goto("https://www.saucedemo.com/");
-  await page.getByRole("textbox", { name: "Username" }).fill("locked_out_user");
-  await page.getByRole("textbox", { name: "Password" }).fill("secret_sauce");
-  await page.getByRole("button", { name: "Login" }).click();
+    await inventoryPage.expectOnInventoryPage();
+  });
 
-  await expect(page.locator("[data-test='error']")).toContainText(
-    "Sorry, this user has been locked out"
-  );
-});
+  test("Login with locked out user", async ({ loginPage }) => {
+    const { username, password } = users.lockedOut();
+    await loginPage.login({ username, password });
 
-test("Login with wrong password", async ({ page }) => {
-  await page.goto("https://www.saucedemo.com/");
-  await page.getByRole("textbox", { name: "Username" }).fill("standard_user");
-  await page.getByRole("textbox", { name: "Password" }).fill("password");
-  await page.getByRole("button", { name: "Login" }).click();
+    await loginPage.expectError("Sorry, this user has been locked out");
+  });
 
-  await expect(page.locator("[data-test='error']")).toContainText(
-    "Username and password do not match"
-  );
-});
+  test("Login with wrong password", async ({ loginPage }) => {
+    const { username } = users.standard();
+    await loginPage.login({ username, password: "wrong_password" });
 
-test("Login with empty username", async ({ page }) => {
-  await page.goto("https://www.saucedemo.com/");
-  await page.getByRole("textbox", { name: "Username" }).fill("");
-  await page.getByRole("textbox", { name: "Password" }).fill("secret_sauce");
-  await page.getByRole("button", { name: "Login" }).click();
+    await loginPage.expectError("Username and password do not match");
+  });
 
-  await expect(page.locator("[data-test='error']")).toContainText(
-    "Username is required"
-  );
-});
+  test("Login with empty username", async ({ loginPage }) => {
+    const { password } = users.standard();
+    await loginPage.login({ username: "", password });
 
-test("Login with empty password", async ({ page }) => {
-  await page.goto("https://www.saucedemo.com/");
-  await page.getByRole("textbox", { name: "Username" }).fill("standard_user");
-  await page.getByRole("textbox", { name: "Password" }).fill("");
-  await page.getByRole("button", { name: "Login" }).click();
+    await loginPage.expectError("Username is required");
+  });
 
-  await expect(page.locator("[data-test='error']")).toContainText(
-    "Password is required"
-  );
-});
+  test("Login with empty password", async ({ loginPage }) => {
+    const { username } = users.standard();
+    await loginPage.login({ username, password: "" });
 
-test("Login with empty username and password", async ({ page }) => {
-  await page.goto("https://www.saucedemo.com/");
-  await page.getByRole("textbox", { name: "Username" }).fill("");
-  await page.getByRole("textbox", { name: "Password" }).fill("");
-  await page.getByRole("button", { name: "Login" }).click();
+    await loginPage.expectError("Password is required");
+  });
 
-  await expect(page.locator("[data-test='error']")).toContainText(
-    "Username is required"
-  );
+  test("Login with empty username and password", async ({ loginPage }) => {
+    await loginPage.login({ username: "", password: "" });
+
+    await loginPage.expectError("Username is required");
+  });
 });

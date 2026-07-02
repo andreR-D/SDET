@@ -1,76 +1,42 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures/base";
+import { users, products, checkoutInfo } from "./fixtures/test-data";
 
-test("Checkout with empty first name shows error", async ({ page }) => {
-  // 1. login
-  await page.goto("https://www.saucedemo.com/");
-  await page.getByRole("textbox", { name: "Username" }).fill("standard_user");
-  await page.getByRole("textbox", { name: "Password" }).fill("secret_sauce");
-  await page.getByRole("button", { name: "Login" }).click();
-  await expect(page).toHaveURL(/\/inventory/);
+test.describe("Checkout", () => {
+  test.beforeEach(async ({ loginPage, inventoryPage, cartPage }) => {
+    const { username, password } = users.standard();
+    await loginPage.goto();
+    await loginPage.login({ username, password });
+    await inventoryPage.expectOnInventoryPage();
 
-  // 2. add item and go to checkout
-  await page.locator('[data-test="add-to-cart-sauce-labs-backpack"]').click();
-  await page.locator(".shopping_cart_link").click();
-  await page.getByRole("button", { name: "Checkout" }).click();
-  await expect(page).toHaveURL(/\/checkout-step-one/);
-  await expect(page.locator(".title")).toHaveText("Checkout: Your Information");
+    await inventoryPage.addToCart(products.backpack);
+    await inventoryPage.openCart();
+    await cartPage.checkout();
+  });
 
-  // 3. empty first name
-  await page.getByRole("textbox", { name: "First Name" }).fill("");
-  await page.getByRole("textbox", { name: "Last Name" }).fill("Keren");
-  await page.getByRole("textbox", { name: "Zip/Postal Code" }).fill("1234");
-  await page.getByRole("button", { name: "Continue" }).click();
+  test("Checkout with empty first name shows error", async ({ checkoutPage }) => {
+    await checkoutPage.expectOnStepOne();
 
-  // 4. should error
-  await expect(page.locator("[data-test='error']")).toContainText("First Name is required");
-});
+    await checkoutPage.fillInfo("", checkoutInfo.lastName, checkoutInfo.postalCode);
+    await checkoutPage.continueToOverview();
 
-test("Checkout with empty last name shows error", async ({ page }) => {
-  // 1. login
-  await page.goto("https://www.saucedemo.com/");
-  await page.getByRole("textbox", { name: "Username" }).fill("standard_user");
-  await page.getByRole("textbox", { name: "Password" }).fill("secret_sauce");
-  await page.getByRole("button", { name: "Login" }).click();
-  await expect(page).toHaveURL(/\/inventory/);
+    await checkoutPage.expectError("First Name is required");
+  });
 
-  // 2. add item and go to checkout
-  await page.locator('[data-test="add-to-cart-sauce-labs-backpack"]').click();
-  await page.locator(".shopping_cart_link").click();
-  await page.getByRole("button", { name: "Checkout" }).click();
-  await expect(page).toHaveURL(/\/checkout-step-one/);
-  await expect(page.locator(".title")).toHaveText("Checkout: Your Information");
+  test("Checkout with empty last name shows error", async ({ checkoutPage }) => {
+    await checkoutPage.expectOnStepOne();
 
-  // 3. empty last name
-  await page.getByRole("textbox", { name: "First Name" }).fill("Andre");
-  await page.getByRole("textbox", { name: "Last Name" }).fill("");
-  await page.getByRole("textbox", { name: "Zip/Postal Code" }).fill("1234");
-  await page.getByRole("button", { name: "Continue" }).click();
+    await checkoutPage.fillInfo(checkoutInfo.firstName, "", checkoutInfo.postalCode);
+    await checkoutPage.continueToOverview();
 
-  // 4. error
-  await expect(page.locator("[data-test='error']")).toContainText("Last Name is required");
-});
+    await checkoutPage.expectError("Last Name is required");
+  });
 
-test("Checkout with empty postal code shows error", async ({ page }) => {
-  // 1. login
-  await page.goto("https://www.saucedemo.com/");
-  await page.getByRole("textbox", { name: "Username" }).fill("standard_user");
-  await page.getByRole("textbox", { name: "Password" }).fill("secret_sauce");
-  await page.getByRole("button", { name: "Login" }).click();
-  await expect(page).toHaveURL(/\/inventory/);
+  test("Checkout with empty postal code shows error", async ({ checkoutPage }) => {
+    await checkoutPage.expectOnStepOne();
 
-  // 2. add item and go to checkout
-  await page.locator('[data-test="add-to-cart-sauce-labs-backpack"]').click();
-  await page.locator(".shopping_cart_link").click();
-  await page.getByRole("button", { name: "Checkout" }).click();
-  await expect(page).toHaveURL(/\/checkout-step-one/);
-  await expect(page.locator(".title")).toHaveText("Checkout: Your Information");
+    await checkoutPage.fillInfo(checkoutInfo.firstName, checkoutInfo.lastName, "");
+    await checkoutPage.continueToOverview();
 
-  // 3. empty postal code
-  await page.getByRole("textbox", { name: "First Name" }).fill("Andre");
-  await page.getByRole("textbox", { name: "Last Name" }).fill("Keren");
-  await page.getByRole("textbox", { name: "Zip/Postal Code" }).fill("");
-  await page.getByRole("button", { name: "Continue" }).click();
-
-  // 4. error
-  await expect(page.locator("[data-test='error']")).toContainText("Postal Code is required");
+    await checkoutPage.expectError("Postal Code is required");
+  });
 });
