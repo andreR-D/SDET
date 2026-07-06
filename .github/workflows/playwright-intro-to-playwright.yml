@@ -1,14 +1,16 @@
 name: Playwright Tests - SDET
+
 on:
   push:
-    branches: [ main, master ]
+    branches: [main, master]
     paths:
-      - 'intro-to-playwright/**'
+      - "intro-to-playwright/**"
   pull_request:
-    branches: [ main, master ]
+    branches: [main, master]
     paths:
-      - 'intro-to-playwright/**'
-  workflow_dispatch: {}
+      - "intro-to-playwright/**"
+  workflow_dispatch:
+
 jobs:
   test:
     timeout-minutes: 60
@@ -16,26 +18,38 @@ jobs:
     defaults:
       run:
         working-directory: intro-to-playwright
+
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
-      with:
-        node-version: lts/*
-    - name: Install dependencies
-      run: npm install -g pnpm && pnpm install
-    - name: Install Playwright Browsers
-      run: pnpm exec playwright install --with-deps
-    - name: Run Playwright tests
-      env:
-        BASE_URL: ${{ secrets.BASE_URL }}
-        STANDARD_USER: ${{ secrets.STANDARD_USER }}
-        LOCKED_OUT_USER: ${{ secrets.LOCKED_OUT_USER }}
-        PROBLEM_USER: ${{ secrets.PROBLEM_USER }}
-        USER_PASSWORD: ${{ secrets.USER_PASSWORD }}
-      run: pnpm exec playwright test
-    - uses: actions/upload-artifact@v4
-      if: ${{ !cancelled() }}
-      with:
-        name: playwright-report-sdet
-        path: intro-to-playwright/playwright-report/
-        retention-days: 30
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: lts/*
+          cache: pnpm
+          cache-dependency-path: intro-to-playwright/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright Browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run Playwright tests
+        env:
+          BASE_URL: ${{ secrets.BASE_URL }}
+          STANDARD_USER: ${{ secrets.STANDARD_USER }}
+          LOCKED_OUT_USER: ${{ secrets.LOCKED_OUT_USER }}
+          PROBLEM_USER: ${{ secrets.PROBLEM_USER }}
+          USER_PASSWORD: ${{ secrets.USER_PASSWORD }}
+        run: pnpm exec playwright test
+
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report-sdet
+          path: intro-to-playwright/playwright-report
+          retention-days: 30
