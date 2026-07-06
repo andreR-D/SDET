@@ -27,6 +27,12 @@ export class InventoryPage {
     await this.item(productName).getByRole("button", { name: "Add to cart" }).click();
   }
 
+  async addProduct(productName: string): Promise<number> {
+    await this.addToCart(productName);
+    const priceText = await this.item(productName).locator('[data-test="inventory-item-price"]').innerText();
+    return parseFloat(priceText.replace("$", ""));
+  }
+
   async removeFromCart(productName: string) {
     await this.item(productName).getByRole("button", { name: "Remove" }).click();
   }

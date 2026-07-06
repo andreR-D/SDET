@@ -10,6 +10,8 @@ export class CheckoutPage {
   readonly finishButton: Locator;
   readonly errorMessage: Locator;
   readonly itemNames: Locator;
+  readonly subtotalLabel: Locator;
+  readonly taxLabel: Locator;
   readonly totalLabel: Locator;
   readonly completeHeader: Locator;
 
@@ -23,6 +25,8 @@ export class CheckoutPage {
     this.finishButton = page.getByRole("button", { name: "Finish" });
     this.errorMessage = page.locator('[data-test="error"]');
     this.itemNames = page.locator('[data-test="inventory-item-name"]');
+    this.subtotalLabel = page.locator('[data-test="subtotal-label"]');
+    this.taxLabel = page.locator('[data-test="tax-label"]');
     this.totalLabel = page.locator('[data-test="total-label"]');
     this.completeHeader = page.locator('[data-test="complete-header"]');
   }
@@ -58,5 +62,39 @@ export class CheckoutPage {
 
   async expectError(message: string) {
     await expect(this.errorMessage).toContainText(message);
+  }
+
+  async checkOrderSummary() {
+    const itemNames = await this.itemNames.allTextContents();
+    console.log("Items in order:", itemNames);
+
+    const subtotalText = await this.subtotalLabel.innerText();
+    const taxText = await this.taxLabel.innerText();
+    const totalText = await this.totalLabel.innerText();
+
+    console.log("Subtotal:", subtotalText);
+    console.log("Tax:", taxText);
+    console.log("Total:", totalText);
+  }
+
+  async checkItemNames(expectedNames: string[]) {
+    const actualNames = await this.itemNames.allTextContents();
+    expect(actualNames).toEqual(expectedNames);
+  }
+  
+  async checkTotal(expectedSubtotal?: number) {
+    const subtotalText = await this.subtotalLabel.innerText();
+    const taxText = await this.taxLabel.innerText();
+    const totalText = await this.totalLabel.innerText();
+
+    const subtotal = parseFloat(subtotalText.replace("Item total: $", ""));
+    const tax = parseFloat(taxText.replace("Tax: $", ""));
+    const total = parseFloat(totalText.replace("Total: $", ""));
+
+    if (expectedSubtotal !== undefined) {
+      expect(subtotal).toBeCloseTo(expectedSubtotal, 2);
+    }
+
+    expect(total).toBeCloseTo(subtotal + tax, 2);
   }
 }
