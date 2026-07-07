@@ -72,15 +72,10 @@ export class CheckoutPage {
 
   async checkOrderSummary() {
     const itemNames = await this.itemNames.allTextContents();
-    console.log("Items in order:", itemNames);
 
     const subtotalText = await this.subtotalLabel.innerText();
     const taxText = await this.taxLabel.innerText();
     const totalText = await this.totalLabel.innerText();
-
-    console.log("Subtotal:", subtotalText);
-    console.log("Tax:", taxText);
-    console.log("Total:", totalText);
   }
 
   async checkItemNames(expectedNames: string[]) {

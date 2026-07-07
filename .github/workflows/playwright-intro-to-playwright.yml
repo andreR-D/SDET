@@ -44,6 +44,7 @@ jobs:
           STANDARD_USER: ${{ secrets.STANDARD_USER }}
           LOCKED_OUT_USER: ${{ secrets.LOCKED_OUT_USER }}
           PROBLEM_USER: ${{ secrets.PROBLEM_USER }}
+          ERROR_USER: ${{ secrets.ERROR_USER }}
           USER_PASSWORD: ${{ secrets.USER_PASSWORD }}
         run: pnpm exec playwright test
 
