@@ -6,6 +6,9 @@ export class ProductDetailPage {
   readonly price: Locator;
   readonly image: Locator;
   readonly addToCartButton: Locator;
+  readonly removeButton: Locator;
+  readonly backButton: Locator;
+  readonly cartBadge: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -13,6 +16,17 @@ export class ProductDetailPage {
     this.price = page.locator('[data-test="inventory-item-price"]');
     this.image = page.locator('[data-test="inventory-item"] img');
     this.addToCartButton = page.getByRole("button", { name: "Add to cart" });
+    this.removeButton = page.getByRole("button", { name: "Remove" });
+    this.backButton = page.getByRole("button", { name: "Back to products" });
+    this.cartBadge = page.locator('[data-test="shopping-cart-badge"]');
+  }
+
+  async addToCart() {
+    await this.addToCartButton.click();
+  }
+
+  async backToProducts() {
+    await this.backButton.click();
   }
 
   async expectOnDetailPage() {

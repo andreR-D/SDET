@@ -46,4 +46,45 @@ test.describe("Authorization", () => {
 
     await loginPage.expectError("Username is required");
   });
+
+  test("Login with problem user succeeds despite known UI bugs", async ({ loginPage, inventoryPage }) => {
+    const { username, password } = users.problem();
+    await loginPage.login({ username, password });
+
+    await inventoryPage.expectOnInventoryPage();
+  });
+
+  test("Login with error user succeeds", async ({ loginPage, inventoryPage }) => {
+    const { username, password } = users.error();
+    await loginPage.login({ username, password });
+
+    await inventoryPage.expectOnInventoryPage();
+  });
+});
+
+test.describe("Authorization - direct URL access", () => {
+  test("Visiting inventory directly without logging in shows an error", async ({ page, inventoryPage }) => {
+    await page.goto("/inventory.html");
+
+    await expect(page.locator('[data-test="error"]')).toContainText(
+      "You can only access '/inventory.html' when you are logged in"
+    );
+    await expect(inventoryPage.pageTitle).not.toBeVisible();
+  });
+
+  test("Visiting cart directly without logging in shows an error", async ({ page }) => {
+    await page.goto("/cart.html");
+
+    await expect(page.locator('[data-test="error"]')).toContainText(
+      "You can only access '/cart.html' when you are logged in"
+    );
+  });
+
+  test("Visiting checkout step one directly without logging in shows an error", async ({ page }) => {
+    await page.goto("/checkout-step-one.html");
+
+    await expect(page.locator('[data-test="error"]')).toContainText(
+      "You can only access '/checkout-step-one.html' when you are logged in"
+    );
+  });
 });

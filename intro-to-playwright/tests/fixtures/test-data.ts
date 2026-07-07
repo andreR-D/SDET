@@ -31,14 +31,23 @@ export const users = {
     username: requireEnv("PROBLEM_USER"),
     password: requireEnv("USER_PASSWORD"),
   }),
+  error: (): Credentials => ({
+    username: requireEnv("ERROR_USER"),
+    password: requireEnv("USER_PASSWORD"),
+  }),
 };
 
-/** Non-secret product/test data used across specs. */
+/** Product/test data used across specs. */
 export const products = {
   backpack: "Sauce Labs Backpack",
   bikeLight: "Sauce Labs Bike Light",
   boltTShirt: "Sauce Labs Bolt T-Shirt",
+  fleeceJacket: "Sauce Labs Fleece Jacket",
+  onesie: "Sauce Labs Onesie",
+  redTShirt: "Test.allTheThings() T-Shirt (Red)",
 } as const;
+
+export const allProducts = Object.values(products);
 
 export const checkoutInfo = {
   firstName: "Andre",

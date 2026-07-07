@@ -47,4 +47,28 @@ test.describe("Cart", () => {
 
     await inventoryPage.expectOnInventoryPage();
   });
+
+  test("Removing all items from cart clears the badge", async ({ inventoryPage, cartPage }) => {
+    await inventoryPage.addToCart(products.backpack);
+    await inventoryPage.addToCart(products.bikeLight);
+    await inventoryPage.expectCartBadgeCount("2");
+
+    await inventoryPage.openCart();
+    await cartPage.itemByName(products.backpack).getByRole("button", { name: "Remove" }).click();
+    await cartPage.itemByName(products.bikeLight).getByRole("button", { name: "Remove" }).click();
+
+    await expect(cartPage.cartItems).toHaveCount(0);
+    await expect(inventoryPage.cartBadge).not.toBeVisible();
+  });
+
+  test("Removing item from inventory page updates cart badge before opening cart", async ({
+    inventoryPage,
+  }) => {
+    await inventoryPage.addToCart(products.backpack);
+    await inventoryPage.expectCartBadgeCount("1");
+
+    await inventoryPage.removeFromCart(products.backpack);
+
+    await expect(inventoryPage.cartBadge).not.toBeVisible();
+  });
 });

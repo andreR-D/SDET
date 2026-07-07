@@ -8,6 +8,7 @@ export class CheckoutPage {
   readonly postalCodeInput: Locator;
   readonly continueButton: Locator;
   readonly finishButton: Locator;
+  readonly cancelButton: Locator;
   readonly errorMessage: Locator;
   readonly itemNames: Locator;
   readonly subtotalLabel: Locator;
@@ -23,6 +24,7 @@ export class CheckoutPage {
     this.postalCodeInput = page.getByRole("textbox", { name: "Zip/Postal Code" });
     this.continueButton = page.getByRole("button", { name: "Continue" });
     this.finishButton = page.getByRole("button", { name: "Finish" });
+    this.cancelButton = page.getByRole("button", { name: "Cancel" });
     this.errorMessage = page.locator('[data-test="error"]');
     this.itemNames = page.locator('[data-test="inventory-item-name"]');
     this.subtotalLabel = page.locator('[data-test="subtotal-label"]');
@@ -43,6 +45,10 @@ export class CheckoutPage {
 
   async finish() {
     await this.finishButton.click();
+  }
+
+  async cancel() {
+    await this.cancelButton.click();
   }
 
   async expectOnStepOne() {

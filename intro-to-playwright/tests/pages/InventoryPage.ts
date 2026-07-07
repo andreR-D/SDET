@@ -8,6 +8,9 @@ export class InventoryPage {
   readonly sortDropdown: Locator;
   readonly itemPrices: Locator;
   readonly itemNames: Locator;
+  readonly menuButton: Locator;
+  readonly resetStateLink: Locator;
+  readonly logoutLink: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -17,6 +20,19 @@ export class InventoryPage {
     this.sortDropdown = page.getByRole("combobox");
     this.itemPrices = page.locator('[data-test="inventory-item-price"]');
     this.itemNames = page.locator('[data-test="inventory-item-name"]');
+    this.menuButton = page.getByRole("button", { name: "Open Menu" });
+    this.resetStateLink = page.locator('[data-test="reset-sidebar-link"]');
+    this.logoutLink = page.locator('[data-test="logout-sidebar-link"]');
+  }
+
+  async resetAppState() {
+    await this.menuButton.click();
+    await this.resetStateLink.click();
+  }
+
+  async logout() {
+    await this.menuButton.click();
+    await this.logoutLink.click();
   }
 
   item(productName: string): Locator {
